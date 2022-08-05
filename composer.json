@@ -1,0 +1,17 @@
+{
+    "name": "open/open-php",
+    "description": "Open Platform PHP Library",
+    "homepage": "https://openfuture.io/",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/OpenFuturePlatform/wallet-core"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+          "Open\\": "lib/"
+        }
+    }
+}
