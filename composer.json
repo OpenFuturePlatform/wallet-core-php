@@ -1,6 +1,6 @@
 {
-    "name": "open/open-php",
-    "description": "Open Platform PHP Library",
+    "name": "open-platform/open-wallet-php",
+    "description": "Open Platform Wallet PHP Library",
     "homepage": "https://openfuture.io/",
     "license": "MIT",
     "repositories": [
