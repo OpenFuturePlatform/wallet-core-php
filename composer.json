@@ -6,7 +6,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/OpenFuturePlatform/wallet-core"
+            "url": "https://github.com/OpenFuturePlatform/wallet-core-php"
         }
     ],
     "autoload": {
