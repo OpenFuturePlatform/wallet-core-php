@@ -46,12 +46,78 @@ sudo make install
 
 ```php
 require_once('lib/OPEN.php');
+
+$open = new OPEN();
+$open->setApiKey("op_api_key");
+$open->setSecretKey("op_api_secret");
+```
+## Coin Types
+```
+0   -> BTC
+60  -> ETH
+144 -> XRP
+195 -> TRX
+354 -> DOT
+501 -> SOL
+714 -> BNB
 ```
 
-Simple usage looks like:
+### Generate new blockchain wallet
 
 ```php
-$open = new OPEN();
-$result = $open->generateWallet();
-echo $result;
+$result = $open->generateWallet($coinType, $saveAddress);
+```
+
+### Import blockchain wallet
+
+```php
+$address = $open->importWallet($privateKey, $coinType);
+```
+
+### Get Nonce value of address
+
+```php
+$nonce = $open->getNonce($address, $network);
+```
+
+### Sign transaction
+
+```php
+$signedTransaction = $open->sign($privateKey, $address, $chainId, $gasPrice, $gasLimit, $amount, $nonce);
+```
+
+### Broadcast transaction
+
+```php
+$trxHash = $open->broadcast($signedTransaction, $coinType);
+```
+
+### Encrypt data with password
+
+```php
+$encryptedData = $open->encrypt($coinType, $privateKey, $password, $saveAddress);
+```
+
+### Decrypt data with password
+
+```php
+$decryptedData = $open->decrypt($data, $password);
+```
+
+### Generate wallet for user
+
+```php
+$wallets = $open->generateUserWallet($userId, $webHookAddress, $coinTypes = array(), $password, $isTest);
+```
+
+### Import user wallet
+
+```php
+$wallets = $open->importUserWallet($userId, $webHookAddress, $encryptedData, $password)
+```
+
+### Generate wallet for order
+
+```php
+$wallets = $open->generateOrderWallet($webHookAddress, $coinTypes = array(), $password, $isTest, $orderId, $amount, $orderCurrency);
 ```

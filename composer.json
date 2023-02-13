@@ -9,6 +9,9 @@
             "url": "https://github.com/OpenFuturePlatform/wallet-core-php"
         }
     ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
     "autoload": {
         "psr-4": {
           "Open\\": "lib/"
