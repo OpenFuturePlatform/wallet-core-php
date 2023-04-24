@@ -22,7 +22,7 @@ class OPEN
     /** 
      * @var string The base URL for the OPEN API. 
      */
-    public static $apiBase = 'https://api.openfuture.io/public/api/v1/wallet';
+    public static $apiBase = 'http://172.23.160.1:8080/public/api/v2/'; //'https://api.openfuture.io';
 
     public static function getApiKey()
     {
@@ -98,30 +98,22 @@ class OPEN
 
     /**
      * @param  string  Signed Transaction
-     * @param  integer Blockchain type
-     * @return string  Returns hash of broadcast
+     * @param  integer Coin type
+     * @return string  Returns hash of succesfull broadcast
      */
     public function broadcast($signedTransaction, $coinType = 60)
     {
-        return self::prepare_request("wallet/broadcast", $signedTransaction, $coinType, "");
+        return self::prepare_request("wallet/broadcast", $signedTransaction, $coinType, "", "");
     }
 
     /**
      * @param  string  Private Key
      * @param  string  Password for encryption
-     * @param  integer Blockchain type
      * @return string  Returns encrypted data
      */
-    public function encrypt($coinType, $privateKey, $password, $saveAddress = false)
+    public function encrypt($privateKey, $password)
     {
-        $encrypted = wallet_encrypt($privateKey, $password);
-
-        if ($saveAddress) {
-            $address = wallet_import($privateKey, $coinType);
-            self::prepare_request("wallet/save", $address, $coinType, $encrypted);
-        }
-
-        return $encrypted;
+        return wallet_encrypt($privateKey, $password);
     }
 
     /**
@@ -139,51 +131,75 @@ class OPEN
      * @param  string  Webhook address - if not empty will be invoked this address on open state
      * @param  array   CoinTypes (0, 60)
      * @param  string  Password - if not empty, private keys will be saved in encrypted format
+     * @param  array   Metadata - Optional, any metadata information
      * @param  boolean Test - if true then will track transactions from test networks
      * @return array   Returns array of generated wallets
      */
-    public function generateUserWallet($userId, $webHookAddress, $coinTypes = array(), $password, $isTest = false)
+    public function generateUserWallet($userId, $webHookAddress, $coinTypes = array(), $isTest = false)
     {
-        $timeStamp = self::get_timestamp();
         $blockchains = array();
         foreach ($coinTypes as $coinType) {
             array_push($blockchains, self::get_coin($coinType));
         }
+        $metadata = array(
+            'bsf' => "test",
+            'alt' => "coin"
+        );
         $args = array(
             'blockchains' => $blockchains,
-            'master_password' => $password,
+            'metadata' => $metadata,
             'test' => $isTest,
-            'timestamp' => strval($timeStamp),
             'user_id' => $userId,
-            'webhook'   => $webHookAddress,
+            'webhook'   => $webHookAddress
         );
         $hash = self::get_signature($args);
 
-        return self::send_request("user/generate", $hash, $args);
+        return self::send_request("wallet/user/generate", $hash, $args);
     }
 
     /**
      * @param  string  User id
      * @param  string  Webhook address - if not empty will be invoked this address on open state
      * @param  string  Encrypted data
-     * @param  string  Password
+     * @param  string  Address
+     * @param  array   Coin (0, 60)
+     * @param  array   Any Metadata
      * @return string  Returns imported wallet
      */
-    public function importUserWallet($userId, $webHookAddress, $encryptedData, $password)
+    public function importUserWallet($userId, $webHookAddress, $isTest = false, $encryptedData, $address, $coin, $metadata = array())
     {
-        $timeStamp = self::get_timestamp();
 
         $args = array(
-            'encrypted_data' => $encryptedData,
-            'master_password' => $password,
-            'timestamp' => strval($timeStamp),
+            'metadata' => $metadata,
+            'test' => $isTest,
             'user_id' => $userId,
+            'wallets' => [
+                array(
+                'address' => $address,
+                'blockchain_type' => self::get_coin($coin),
+                'encrypted_data' => $encryptedData
+                )
+            ],
             'webhook'   => $webHookAddress,
         );
         $hash = self::get_signature($args);
 
-        return self::send_request("user/import", $hash, $args);
+        return self::send_request("wallet/user/import", $hash, $args);
     }
+
+    /**
+     * @param  string  User id
+     * @return array   Returns wallets
+     */
+    public function getUserWallet($userId)
+    {
+        $args = array(
+            'userId' => $userId
+        );
+
+        return self::send_get_request("wallet/user?", $args);
+    }
+
 
     /**
      * @param  string  Webhook address - if not empty will be invoked this address on open state
@@ -193,28 +209,104 @@ class OPEN
      * @param  string  Order Id
      * @param  string  Amount
      * @param  string  Order Fiat Currency (USD, EUR)
+     * @param  array   Any Metadata
      * @return array   Returns array of generated wallets
      */
-    public function generateOrderWallet($webHookAddress, $coinTypes = array(), $password, $isTest = false, $orderId, $amount, $orderCurrency)
+    public function generateOrderWallet($webHookAddress, $coinTypes = array(), $isTest = false, $orderId, $amount, $orderCurrency, $metadata = array())
     {
-        $timeStamp = self::get_timestamp();
+
         $blockchains = array();
         foreach ($coinTypes as $coinType) {
             array_push($blockchains, self::get_coin($coinType));
         }
+        
         $args = array(
             'amount' => $amount,
             'blockchains' => $blockchains,
-            'master_password' => $password,
+            'metadata' => $metadata,
             'order_currency' => $orderCurrency,
             'order_id' => $orderId,
             'test' => $isTest,
-            'timestamp' => strval($timeStamp),
             'webhook'   => $webHookAddress,
         );
         $hash = self::get_signature($args);
 
-        return self::send_request("order/generate", $hash, $args);
+        return self::send_request("wallet/order/generate", $hash, $args);
+    }
+
+    /**
+     * @param  string  Webhook address - if not empty will be invoked this address on open state
+     * @param  string  Encrypted data
+     * @param  string  Address
+     * @param  string  Order Id
+     * @param  string  Amount
+     * @param  string  Order Fiat Currency (USD, EUR)
+     * @param  array   Any Metadata
+     * @return array   Returns array of generated wallets
+     */
+    public function importOrderWallet($webHookAddress, $orderId, $amount, $isTest = false, $orderCurrency, $encryptedData, $address, $coin, $metadata = array())
+    {
+        
+        $args = array(
+            'amount' => $amount,
+            'metadata' => $metadata,
+            'order_currency' => $orderCurrency,
+            'order_id' => $orderId,
+            'test' => $isTest,
+            'wallets' => [
+                array(
+                'address' => $address,
+                'blockchain_type' => self::get_coin($coin),
+                'encrypted_data' => $encryptedData
+                )
+            ],
+            'webhook'   => $webHookAddress,
+        );
+        
+        $hash = self::get_signature($args);
+
+        return self::send_request("wallet/order/import", $hash, $args);
+    }
+
+    /**
+     * @param  string  Order id
+     * @return array   Returns wallets
+     */
+    public function getOrderWallet($orderId)
+    {
+        $args = array(
+            'orderId' => $orderId
+        );
+
+        return self::send_get_request("wallet/order?", $args);
+    }
+
+    /**
+     * @param  string  Webhook address - if not empty will be invoked this address on open state
+     * @param  string  Encrypted data
+     * @param  string  Address
+     * @param  array   Any Metadata
+     * @return array   Returns array of generated wallets
+     */
+    public function importEncryptedWallet($webHookAddress, $isTest = false, $encryptedData, $address, $coin, $metadata = array())
+    {
+        
+        $args = array(
+            'metadata' => $metadata,
+            'test' => $isTest,
+            'wallets' => [
+                array(
+                'address' => $address,
+                'blockchain_type' => self::get_coin($coin),
+                'encrypted_data' => $encryptedData
+                )
+            ],
+            'webhook'   => $webHookAddress,
+        );
+        
+        $hash = self::get_signature($args);
+
+        return self::send_request("wallet/import", $hash, $args);
     }
 
     public static function get_timestamp(): int
@@ -223,14 +315,12 @@ class OPEN
         return $currentDate->getTimestamp();
     }
 
-    public static function prepare_request($url, $address, $coinType, $encryption)
+    public static function prepare_request($url, $address, $coinType, $encryption, $password)
     {
-        $timeStamp = self::get_timestamp();
         $args = array(
             'address'   => $address,
             "blockchain" => self::get_coin($coinType),
-            'encrypted' => $encryption,
-            'timestamp' => strval($timeStamp),
+            'encrypted_data' => $encryption,
         );
         $hash = self::get_signature($args);
 
@@ -239,22 +329,24 @@ class OPEN
 
     public static function get_signature($args): string
     {
-        $jsonString = json_encode($args);
+        $jsonString = json_encode($args, JSON_UNESCAPED_SLASHES);
         return hash_hmac('sha256', $jsonString, self::$secretKey);
     }
 
     public static function send_request(string $endpoint, string $hash, array $params = array())
     {
 
+        $timeStamp = self::get_timestamp();
         $headers = array(
             'X-API-KEY: ' . self::$apiKey,
             'X-API-SIGNATURE: ' . $hash,
+            'X-API-TIMESTAMP: ' . $timeStamp,
             'Content-Type: application/json'
         );
 
         $url = self::$apiBase . $endpoint;
 
-        $payload = json_encode($params);
+        $payload = json_encode($params, JSON_UNESCAPED_SLASHES);
 
         $ch = curl_init();
 
@@ -264,6 +356,34 @@ class OPEN
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_POST, true);
+
+        $response = curl_exec($ch);
+
+        curl_close($ch);
+
+        return $response;
+    }
+
+    public static function send_get_request(string $endpoint, array $params = array())
+    {
+
+        $timeStamp = self::get_timestamp();
+        $headers = array(
+            'X-API-KEY: ' . self::$apiKey,
+            'X-API-TIMESTAMP: ' . $timeStamp,
+            'Content-Type: application/json'
+        );
+
+        $url = self::$apiBase . $endpoint;
+
+        $url .= http_build_query($params, '', '&');
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 
         $response = curl_exec($ch);
 

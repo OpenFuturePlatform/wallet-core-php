@@ -95,7 +95,7 @@ $trxHash = $open->broadcast($signedTransaction, $coinType);
 ### Encrypt data with password
 
 ```php
-$encryptedData = $open->encrypt($coinType, $privateKey, $password, $saveAddress);
+$encryptedData = $open->encrypt($privateKey, $password);
 ```
 
 ### Decrypt data with password
@@ -104,20 +104,26 @@ $encryptedData = $open->encrypt($coinType, $privateKey, $password, $saveAddress)
 $decryptedData = $open->decrypt($data, $password);
 ```
 
-### Generate wallet for user
+### Generate Wallet for User
 
 ```php
-$wallets = $open->generateUserWallet($userId, $webHookAddress, $coinTypes = array(), $password, $isTest);
+$wallets = $open->generateUserWallet($userId, $webHookAddress, $coinTypes = array(), $isTest);
 ```
 
-### Import user wallet
+### Import user Wallet
 
 ```php
-$wallets = $open->importUserWallet($userId, $webHookAddress, $encryptedData, $password)
+$wallets = $open->importUserWallet($userId, $webHookAddress, $isTest, $encryptedData, $address, $coinType, $metadata)
 ```
 
-### Generate wallet for order
+### Generate Wallet for Order
 
 ```php
-$wallets = $open->generateOrderWallet($webHookAddress, $coinTypes = array(), $password, $isTest, $orderId, $amount, $orderCurrency);
+$wallets = $open->generateOrderWallet($webHookAddress, $coinTypes = array(), $isTest, $orderId, $amount, $orderCurrency, $metadata);
+```
+
+### Import Wallet for Order
+
+```php
+$wallets = $open->importOrderWallet($webHookAddress, $orderId, $amount, $isTest, $orderCurrency, $encryptedData, $address, $coinType, $metadata);
 ```
