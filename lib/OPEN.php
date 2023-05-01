@@ -149,7 +149,7 @@ class OPEN
             'blockchains' => $blockchains,
             'metadata' => $metadata,
             'test' => $isTest,
-            'user_id' => $userId,
+            'userId' => $userId,
             'webhook'   => $webHookAddress
         );
         $hash = self::get_signature($args);
@@ -172,12 +172,12 @@ class OPEN
         $args = array(
             'metadata' => $metadata,
             'test' => $isTest,
-            'user_id' => $userId,
+            'userId' => $userId,
             'wallets' => [
                 array(
                 'address' => $address,
-                'blockchain_type' => self::get_coin($coin),
-                'encrypted_data' => $encryptedData
+                'blockchainType' => self::get_coin($coin),
+                'encryptedData' => $encryptedData
                 )
             ],
             'webhook'   => $webHookAddress,
@@ -224,8 +224,8 @@ class OPEN
             'amount' => $amount,
             'blockchains' => $blockchains,
             'metadata' => $metadata,
-            'order_currency' => $orderCurrency,
-            'order_id' => $orderId,
+            'orderCurrency' => $orderCurrency,
+            'orderId' => $orderId,
             'test' => $isTest,
             'webhook'   => $webHookAddress,
         );
@@ -250,14 +250,14 @@ class OPEN
         $args = array(
             'amount' => $amount,
             'metadata' => $metadata,
-            'order_currency' => $orderCurrency,
-            'order_id' => $orderId,
+            'orderCurrency' => $orderCurrency,
+            'orderId' => $orderId,
             'test' => $isTest,
             'wallets' => [
                 array(
                 'address' => $address,
-                'blockchain_type' => self::get_coin($coin),
-                'encrypted_data' => $encryptedData
+                'blockchainType' => self::get_coin($coin),
+                'encryptedData' => $encryptedData
                 )
             ],
             'webhook'   => $webHookAddress,
@@ -297,8 +297,8 @@ class OPEN
             'wallets' => [
                 array(
                 'address' => $address,
-                'blockchain_type' => self::get_coin($coin),
-                'encrypted_data' => $encryptedData
+                'blockchainType' => self::get_coin($coin),
+                'encryptedData' => $encryptedData
                 )
             ],
             'webhook'   => $webHookAddress,
@@ -320,7 +320,7 @@ class OPEN
         $args = array(
             'address'   => $address,
             "blockchain" => self::get_coin($coinType),
-            'encrypted_data' => $encryption,
+            'encryptedData' => $encryption,
         );
         $hash = self::get_signature($args);
 
