@@ -22,7 +22,7 @@ class OPEN
     /** 
      * @var string The base URL for the OPEN API. 
      */
-    public static $apiBase = 'http://172.23.160.1:8080/public/api/v2/'; //'https://api.openfuture.io';
+    public static $apiBase = 'https://api.openfuture.io/public/api/v2/';
 
     public static function getApiKey()
     {

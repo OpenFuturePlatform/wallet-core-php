@@ -5,8 +5,8 @@ use OPEN\OPEN;
 require "OPEN.php";
 
 $open = new OPEN();
-$open->setApiKey("op_jGbshr6NCZvQM2rpX4+8");
-$open->setSecretKey("op_UUu2Zu4Aam+eKnmnYc1rbeXj0Jj85QjxZWeDSzKf");
+$open->setApiKey("op_f/bwk5jkFCI6mrTtTSkZ");
+$open->setSecretKey("op_tcAziDFGAqGvtEQKDNh4sSkZw1/qpdP15fFLQNPm");
 
 $metadata = array(
     'bsf' => "test",
